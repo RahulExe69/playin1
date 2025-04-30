@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Creator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        label { display: block; margin: 0.5rem 0; }
+        input { padding: 0.5rem; width: 100%; max-width: 300px; }
+        button { padding: 0.5rem 1rem; margin-top: 1rem; }
+        .message { margin: 1rem 0; font-weight: bold; }
+        .error { color: red; }
+        .success { color: green; }
+        #status-panel { margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <h1>Automated Account Creator</h1>
+    {% if error %}
+        <div class="message error">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+        <div class="message success">{{ success }}</div>
+    {% endif %}
+    <form method="post">
+        <label>
+            Base Username:
+            <input type="text" name="base_username" required>
+        </label>
+        <label>
+            Password:
+            <input type="password" name="password" required>
+        </label>
+        <label>
+            Number of Accounts:
+            <input type="number" name="count" min="1" required>
+        </label>
+        <label>
+            Custom Phone (10 digits, optional):
+            <input type="text" name="phone" pattern="\d{10}">
+        </label>
+        <button type="submit">Start Creation</button>
+    </form>
+
+    <div id="status-panel">
+        <h2>Live Status</h2>
+        <div>Total to create: <span id="total">0</span></div>
+        <div>Created: <span id="created">0</span></div>
+        <div>Success: <span id="success">0</span></div>
+        <div>Failure: <span id="failure">0</span></div>
+        <div>Running: <span id="running">false</span></div>
+    </div>
+
+    <script>
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/status');
+                const data = await res.json();
+                document.getElementById('total').textContent = data.total;
+                document.getElementById('created').textContent = data.created;
+                document.getElementById('success').textContent = data.success;
+                document.getElementById('failure').textContent = data.failure;
+                document.getElementById('running').textContent = data.running;
+            } catch (e) {
+                console.error('Failed to fetch status:', e);
+            }
+        }
+        setInterval(fetchStatus, 2000);  // Poll every 2 seconds
+        window.onload = fetchStatus;
+    </script>
+</body>
+</html>
